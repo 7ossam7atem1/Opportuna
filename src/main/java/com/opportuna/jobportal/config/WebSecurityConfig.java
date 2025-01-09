@@ -30,7 +30,7 @@ public class WebSecurityConfig {
             "/*.css",
             "/*.js",
             "/*.js.map",
-            "/fonts**", "/favicon.ico", "/resources/**", "/error"};
+            "/fonts**", "/favicon.ico", "/resources/**" , "/error"};
 
     @Autowired
     public WebSecurityConfig(CustomUserDetailsService customUserDetailsService, CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler) {

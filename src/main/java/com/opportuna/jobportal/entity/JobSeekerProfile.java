@@ -57,6 +57,9 @@ public class JobSeekerProfile {
         this.skills = skills;
     }
 
+    public JobSeekerProfile() {
+
+    }
 
 
     public int getUserAccountId() {

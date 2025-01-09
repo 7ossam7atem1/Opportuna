@@ -48,6 +48,10 @@ public class RecruiterProfile {
 
     }
 
+    public RecruiterProfile() {
+
+    }
+
 
     public int getUserAccountId() {
         return userAccountId;

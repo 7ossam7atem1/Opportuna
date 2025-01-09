@@ -7,6 +7,11 @@ import com.opportuna.jobportal.repository.JobSeekerProfileRepository;
 import com.opportuna.jobportal.repository.RecruiterProfileRepository;
 import com.opportuna.jobportal.repository.UsersRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -41,4 +46,26 @@ public class UsersService {
         }
         return savedUser;
     }
+
+    public Object getCurrentUserProfile() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || authentication instanceof AnonymousAuthenticationToken) {
+            return null; // User is not authenticated
+        }
+
+        String userName = authentication.getName();
+        Users users = (Users) usersRepository.findByEmail(userName).orElse(null); // Return null if user not found
+        if (users == null) {
+            return null; // User not found in the database
+        }
+
+        int userId = users.getUserId();
+        if (authentication.getAuthorities().contains(new SimpleGrantedAuthority("Recruiter"))) {
+            return recruiterProfileRepository.findById(userId).orElse(new RecruiterProfile());
+        } else {
+            return jobSeekerProfileRepository.findById(userId).orElse(new JobSeekerProfile());
+        }
+    }
+
+
 }
