@@ -1,5 +1,6 @@
 package com.opportuna.jobportal.controller;
 
+
 import com.opportuna.jobportal.services.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -11,7 +12,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
 public class JobPostActivityController {
-    private UsersService usersService;
+
+    private final UsersService usersService;
 
     @Autowired
     public JobPostActivityController(UsersService usersService) {
@@ -35,7 +37,5 @@ public class JobPostActivityController {
 
         return "dashboard";
     }
-
-
 
 }

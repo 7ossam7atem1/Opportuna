@@ -1,16 +1,15 @@
 package com.opportuna.jobportal.controller;
 
+
 import com.opportuna.jobportal.entity.Users;
 import com.opportuna.jobportal.entity.UsersType;
 import com.opportuna.jobportal.services.UsersService;
 import com.opportuna.jobportal.services.UsersTypeService;
-
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Controller;
@@ -19,9 +18,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import java.util.List;
+import java.util.Optional;
 
 @Controller
 public class UsersController {
+
     private final UsersTypeService usersTypeService;
     private final UsersService usersService;
 
@@ -33,20 +34,24 @@ public class UsersController {
 
     @GetMapping("/register")
     public String register(Model model) {
-        List<UsersType> userTypes = usersTypeService.getAll();
-        model.addAttribute("getAllTypes", userTypes);
+        List<UsersType> usersTypes = usersTypeService.getAll();
+        model.addAttribute("getAllTypes", usersTypes);
         model.addAttribute("user", new Users());
         return "register";
     }
 
     @PostMapping("/register/new")
-    public String userRegisteration(@Valid Users users) {
-        double startTime = System.currentTimeMillis();
-        System.out.println("User: " + users);
+    public String userRegistration(@Valid Users users, Model model) {
+        Optional<Object> optionalUsers = usersService.getUserByEmail(users.getEmail());
+        if (optionalUsers.isPresent()) {
+            model.addAttribute("error", "Email already registered,try to login or register with other email.");
+            List<UsersType> usersTypes = usersTypeService.getAll();
+            model.addAttribute("getAllTypes", usersTypes);
+            model.addAttribute("user", new Users());
+            return "register";
+        }
         usersService.addNew(users);
-        double endTime = System.currentTimeMillis();
-        System.out.println("Time taken: " + (endTime - startTime) + "ms");
-        return "dashboard";
+        return "redirect:/dashboard/";
     }
 
     @GetMapping("/login")
@@ -58,9 +63,11 @@ public class UsersController {
     public String logout(HttpServletRequest request, HttpServletResponse response) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
         if (authentication != null) {
             new SecurityContextLogoutHandler().logout(request, response, authentication);
         }
+
         return "redirect:/";
     }
 }

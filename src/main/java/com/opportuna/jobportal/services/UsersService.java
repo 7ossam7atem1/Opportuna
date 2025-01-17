@@ -10,13 +10,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
-import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UsersService {
@@ -50,13 +49,13 @@ public class UsersService {
     public Object getCurrentUserProfile() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || authentication instanceof AnonymousAuthenticationToken) {
-            return null; // User is not authenticated
+            return null;
         }
 
         String userName = authentication.getName();
-        Users users = (Users) usersRepository.findByEmail(userName).orElse(null); // Return null if user not found
+        Users users = (Users) usersRepository.findByEmail(userName).orElse(null);
         if (users == null) {
-            return null; // User not found in the database
+            return null;
         }
 
         int userId = users.getUserId();
@@ -67,5 +66,7 @@ public class UsersService {
         }
     }
 
-
+    public Optional<Object> getUserByEmail(String email) {
+        return usersRepository.findByEmail(email);
+    }
 }
