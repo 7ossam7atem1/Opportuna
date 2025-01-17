@@ -1,18 +1,26 @@
 package com.opportuna.jobportal.controller;
 
+import ch.qos.logback.core.util.StringUtil;
 import com.opportuna.jobportal.entity.RecruiterProfile;
 import com.opportuna.jobportal.entity.Users;
 import com.opportuna.jobportal.repository.UsersRepository;
 import com.opportuna.jobportal.services.RecruiterProfileService;
+import com.opportuna.jobportal.util.FileUploadUtil;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.util.Objects;
 import java.util.Optional;
 
 @Controller
@@ -43,5 +51,32 @@ public class RecruiterProfileController {
         }
 
         return "recruiter_profile";
+    }
+
+    @PostMapping("/addNew")
+    public String addNew(RecruiterProfile recruiterProfile,
+                         @RequestParam("image") MultipartFile multipartfile, Model model) throws IOException {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (!(authentication instanceof AnonymousAuthenticationToken)) {
+            String currentUsername = authentication.getName();
+            Users users = (Users) usersRepository.findByEmail(currentUsername).orElseThrow(() -> new UsernameNotFoundException("Could not found user"));
+            recruiterProfile.setUserId(users);
+            recruiterProfile.setUserAccountId(users.getUserId());
+
+        }
+        model.addAttribute("profile", recruiterProfile);
+        String fileName = "";
+        if (!multipartfile.getOriginalFilename().equals("")) {
+            fileName = StringUtils.cleanPath(Objects.requireNonNull(multipartfile.getOriginalFilename()));
+            recruiterProfile.setProfilePhoto(fileName);
+
+        }
+        RecruiterProfile savedProfile = recruiterProfileService.addNew(recruiterProfile);
+
+        String uploadDir = "photos/recruiter/" + savedProfile.getUserAccountId();
+
+        FileUploadUtil.saveFile(uploadDir, fileName, multipartfile);
+        return "redirect:/dashboard/";
     }
 }
