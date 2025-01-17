@@ -54,29 +54,30 @@ public class RecruiterProfileController {
     }
 
     @PostMapping("/addNew")
-    public String addNew(RecruiterProfile recruiterProfile,
-                         @RequestParam("image") MultipartFile multipartfile, Model model) throws IOException {
+    public String addNew(RecruiterProfile recruiterProfile, @RequestParam("image") MultipartFile multipartFile, Model model) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (!(authentication instanceof AnonymousAuthenticationToken)) {
             String currentUsername = authentication.getName();
-            Users users = (Users) usersRepository.findByEmail(currentUsername).orElseThrow(() -> new UsernameNotFoundException("Could not found user"));
+            Users users = (Users) usersRepository.findByEmail(currentUsername).orElseThrow(() -> new UsernameNotFoundException("Could not " + "found user"));
             recruiterProfile.setUserId(users);
             recruiterProfile.setUserAccountId(users.getUserId());
-
         }
         model.addAttribute("profile", recruiterProfile);
         String fileName = "";
-        if (!multipartfile.getOriginalFilename().equals("")) {
-            fileName = StringUtils.cleanPath(Objects.requireNonNull(multipartfile.getOriginalFilename()));
+        if (!multipartFile.getOriginalFilename().equals("")) {
+            fileName = StringUtils.cleanPath(Objects.requireNonNull(multipartFile.getOriginalFilename()));
             recruiterProfile.setProfilePhoto(fileName);
-
         }
-        RecruiterProfile savedProfile = recruiterProfileService.addNew(recruiterProfile);
+        RecruiterProfile savedUser = recruiterProfileService.addNew(recruiterProfile);
 
-        String uploadDir = "photos/recruiter/" + savedProfile.getUserAccountId();
+        String uploadDir = "photos/recruiter/" + savedUser.getUserAccountId();
+        try {
+            FileUploadUtil.saveFile(uploadDir, fileName, multipartFile);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
 
-        FileUploadUtil.saveFile(uploadDir, fileName, multipartfile);
         return "redirect:/dashboard/";
     }
 }

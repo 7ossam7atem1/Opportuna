@@ -12,7 +12,7 @@ public class RecruiterProfile {
     @OneToOne
     @JoinColumn(name = "user_account_id")
     @MapsId
-    private  Users userId;
+    private Users userId;
 
     private String firstName;
 
@@ -26,7 +26,7 @@ public class RecruiterProfile {
 
     private String company;
 
-    @Column(nullable = true,length = 64)
+    @Column(nullable = true, length = 64)
     private String profilePhoto;
 
 
@@ -123,6 +123,14 @@ public class RecruiterProfile {
 
     public void setProfilePhoto(String profilePhoto) {
         this.profilePhoto = profilePhoto;
+    }
+
+
+    @Transient
+    public String getPhotosImagePath() {
+        if (profilePhoto == null) return null;
+
+        return "/photos/recruiter/" + userAccountId + "/" + profilePhoto;
     }
 
     @Override
