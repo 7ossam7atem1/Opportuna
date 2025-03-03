@@ -11,6 +11,8 @@ import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.parameters.P;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -68,5 +70,14 @@ public class UsersService {
 
     public Optional<Object> getUserByEmail(String email) {
         return usersRepository.findByEmail(email);
+    }
+
+    public Users getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (!(authentication instanceof AnonymousAuthenticationToken)) {
+           String  username =  authentication.getName();
+            return (Users) usersRepository.findByEmail(username).orElseThrow(() -> new UsernameNotFoundException("Couldn't find " + username + " user"));
+        }
+        return null;
     }
 }
