@@ -20,6 +20,10 @@ public class JobPostActivityService {
         this.jobPostActivityRepository = jobPostActivityRepository;
     }
 
+    public  JobPostActivity getOne(int id) {
+        return jobPostActivityRepository.findById(id).orElseThrow(()-> new RuntimeException("Job Not Found"));
+    }
+
     public JobPostActivity addNew(JobPostActivity jobPostActivity) {
         return jobPostActivityRepository.save(jobPostActivity);
     }
