@@ -15,6 +15,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import java.util.Date;
@@ -72,5 +73,14 @@ public class JobPostActivityController {
         model.addAttribute("jobPostActivity", jobPostActivity);
         jobPostActivityService.addNew(jobPostActivity);
         return "redirect:/dashboard/";
+    }
+
+
+    @PostMapping("dashboard/edit/{id}")
+    public String editJob(@PathVariable("id") int id, Model model) {
+        JobPostActivity jopPost = jobPostActivityService.getOne(id);
+        model.addAttribute("jobPostActivity", jopPost);
+        model.addAttribute("user", usersService.getCurrentUserProfile());
+        return "add-jobs";
     }
 }
